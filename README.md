@@ -1,2 +1,5 @@
 # careerfairsystems-algorithms
-Algorithms to be used for the carreer fair
+TBD
+
+- BANQUET SEATMAP
+- COMPANY HOST PLACEMENT
