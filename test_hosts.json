@@ -1,0 +1,32 @@
+{
+    "André Frisk": {
+        "first": "Fogarolli",
+        "remaining": ["Icaros", "Viking"],
+        "advantage": 0,
+        "done": false
+    },
+    "Alexander Hansson": {
+        "first": "Alexanders korvaluda",
+        "remaining": ["Maritza", "Icaros", "Coop", "ICA"],
+        "advantage": 0,
+        "done": false
+    },
+    "Enya Nilsson": {
+        "first": "Fogarolli",
+        "remaining": ["Icaros", "Viking", "ICA"],
+        "advantage": 0,
+        "done": false
+    },
+    "Niklas Ku": {
+        "first": "Piri Piri",
+        "remaining": ["Fogarolli", "Viking", "Coop", "ICA", "Bertils kiosk", "IKEA"],
+        "advantage": 0,
+        "done": false
+    },
+    "Linus Ljunghusen": {
+        "first": "Fogarolli",
+        "remaining": ["Alexanders korvaluda", "Bertils kiosk", "IKEA", "Coop"],
+        "advantage": 0,
+        "done": false
+    }
+}
