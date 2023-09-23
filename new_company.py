@@ -7,20 +7,31 @@ r2 = open('test_companies.json')
 hosts = json.load(r1)
 companies = json.load(r2)
 
+# TODO: Någonstans i koden så skriver den över en tidigare vald company och inte hanterar 
+# advantage. T.ex Niklas får Fogarolli när André, Enya och Linus har Fogarolli som första 
+# val. Någon av dessa tre ska ha den och resterande två ska ha högre advantage.
+# Gissningsvis är detta ett problem från "Second choice", dubbelkolla så first choice fungerar
+
 i = 1
 while(True):
+    # Check if all hosts have two companies assigned
+    all_assigned = all(len(data["assigned"]) == 2 for _, data in hosts.items())
+    if all_assigned:
+        break
+    
+    for host in hosts:
+        if len(hosts[host]) != 2:
+            break
+    
     # First choice
     for company in companies:
-        if companies[company]:
+        if companies[company]: # If the company already has one host assigned, then it is done
             continue
         tmp_hosts = []
-        #print(company)
         for host in hosts:
             h = hosts[host]
-            if len(h) == 2:
+            if len(h["assigned"]) > 1: # If the host has already chosen two companies, the host is then done
                 continue
-            # print(host)
-            # print(h)
             if company == h["first"]:
                 tmp_hosts.append(host)
         if len(tmp_hosts) == i:
@@ -42,46 +53,80 @@ while(True):
                 # Get the list of people with the minimum "remaining" length
                 min_people = min_remaining_lengths[min_length]
                 
-                # TODO:
-                # OM båda studenterna enbart har ett företag kvar, då vinner studenten med
-                # flest advantage. Studenten som förlorar får ett företag som ingen hade önskat.
+                # Sort students based on the number of companies they've wished for
+                sorted_students = sorted(tmp_hosts, key=lambda x: (len(hosts[x]["remaining"]), -hosts[x]["advantage"]))
                 
-                chosen = random.choice(min_people)
-                for z in min_people:
-                    if z != chosen:
-                        hosts[z]["advantage"] += 1
+                # The first student in the sorted list is the chosen one
+                chosen = sorted_students[0]
+                
+                # All other students receive an "advantage" point
+                for student in sorted_students[1:]:
+                    hosts[student]["advantage"] += 1
             else:        
                 chosen = random.choice(tmp_hosts)
 
+            hosts[chosen]["assigned"].append(company)
             companies[company].append(chosen)
             
             
     # Second choice
-    # for company in companies:
-    #     if len(companies[company]) == 2:
-    #         continue
-    #     tmp_hosts = []
-    #     for host in hosts:
-    #         h = hosts[host]
-    #         if company == h["second"]:
-    #             tmp_hosts.append(host)
-    #     if len(tmp_hosts) == i:
-    #         chosen = random.choice(tmp_hosts)
-    #         for x in tmp_hosts:
-    #             if x != chosen:
-    #                 hosts[x]["advantage"] += 1
-    #         companies[company].append(chosen)
+    for company in companies:
+        # If the company already has one or more hosts assigned, then it is done
+        if len(companies[company]) >= 1:
+            continue
+
+        tmp_hosts = []
+
+        for host in hosts:
+            h = hosts[host]
+            # If the host has already chosen two companies, the host is then done
+            if len(h["assigned"]) > 1:
+                continue
+
+            # Check if the company is in the host's "remaining" list
+            if company in h["remaining"]:
+                tmp_hosts.append(host)
+
+        if len(tmp_hosts) == i:
+            if len(tmp_hosts) > 1:
+                sorted_students = sorted(tmp_hosts, key=lambda x: (len(hosts[x]["remaining"]), -hosts[x]["advantage"]))
+                
+                # The first student in the sorted list is the chosen one
+                chosen = sorted_students[0]
+                
+                # All other students receive an "advantage" point
+                for student in sorted_students[1:]:
+                    hosts[student]["advantage"] += 1
+            else:
+                chosen = random.choice(tmp_hosts)
+
+            hosts[chosen]["assigned"].append(company)
+            companies[company].append(chosen)
+
     
     i += 1
-    print(hosts)
-    print(companies)
-    print("\n\n")
+    # break
     if(i == 5):
         break
-        
     
-    
+# Post-processing to ensure all hosts have two companies
+for host, data in hosts.items():
+    while len(data["assigned"]) < 2:
+        for company, assigned_hosts in companies.items():
+            if len(assigned_hosts) == 0:
+                data["assigned"].append(company)
+                companies[company].append(host)
+                break
 
+    
+print(json.dumps(hosts, indent=2))
+print(json.dumps(companies, indent=2))
+        
+
+print("Companies with no host assigned:")
+for company in companies:
+    if not companies[company]:
+        print(company)
 
 r1.close()
 r2.close()
