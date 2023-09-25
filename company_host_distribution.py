@@ -1,7 +1,5 @@
-import json
 import random
 import pandas as pd
-import math
 
 df_hosts = pd.read_excel('VÄRDAR 2023.xlsx', sheet_name='COMPANY HOST DATA', usecols='B:D')
 df_companies = pd.read_excel('VÄRDAR 2023.xlsx', sheet_name='COMPANY HOST STATISTIK ')
@@ -18,7 +16,7 @@ hosts = {
         "advantage": 0,
         "assigned": []
     }
-    for name, first, remaining in zip(host_names, host_first, host_remaining) if not name == "nan"
+    for name, first, remaining in zip(host_names, host_first, host_remaining) if not str(name) == "nan"
 }
 
 companies = {
@@ -26,11 +24,6 @@ companies = {
     for company in companies if not company == "nan"
 }
 
-""" r1 = open('test_hosts.json')
-r2 = open('test_companies.json')
-
-hosts = json.load(r1)
-companies = json.load(r2) """
 
 i = 1
 # Before the while loop, create a list of companies prioritized by how many students have them as their first choice
@@ -74,7 +67,7 @@ while(True):
             if len(h["assigned"]) > 1:
                 continue
 
-            # Check if the company is in the host's "remaining" list
+            # Check if the company is in the host's "remaining" list           
             if company in h["remaining"]:
                 tmp_hosts.append(host)
 
@@ -115,11 +108,6 @@ for host, data in hosts.items():
         # If no company was assigned in the current iteration, break out of the while loop
         if not assigned_company:
             break
-
-
-    
-""" print(json.dumps(hosts, indent=2))
-print(json.dumps(companies, indent=2)) """
         
 
 print("Companies with no host assigned:")
@@ -127,19 +115,24 @@ for company in companies:
     if not companies[company]:
         print(company)
 
-r1.close()
-r2.close()
-
 # 1. Percentage of First Choices Fulfilled
 first_choice_fulfilled = sum(1 for host, data in hosts.items() if data["first"] in data["assigned"])
 percentage_first_choice = (first_choice_fulfilled / len(hosts)) * 100
 
-# 2. Average Advantage Points
+# 2. Percentage of Any Choice (First or Remaining) Fulfilled
+any_choice_fulfilled = sum(1 for host, data in hosts.items() if any(choice in data["assigned"] for choice in [data["first"]] + data["remaining"].split(", ")))
+percentage_any_choice = (any_choice_fulfilled / len(hosts)) * 100
+
+# 3. Average Advantage Points
 average_advantage = sum(data["advantage"] for data in hosts.values()) / len(hosts)
 
-# 3. Number of Hosts with Unfulfilled Choices
-unfulfilled_hosts = sum(1 for host, data in hosts.items() if not any(choice in data["assigned"] for choice in [data["first"]] + data["remaining"]))
+# 4. Number of Hosts with Unfulfilled Choices
+unfulfilled_hosts_data = [host for host, data in hosts.items() if not any(choice in data["assigned"] for choice in [data["first"]] + data["remaining"].split(", "))]
+unfulfilled_hosts = len(unfulfilled_hosts_data)
+
 
 print(f"\n\nPercentage of First Choices Fulfilled: {percentage_first_choice}%")
-print(f"Average Advantage Points: {average_advantage}")
+print(f"Percentage of Any Choice Fulfilled: {percentage_any_choice:.2f}%")
+print(f"Average Advantage Points: {average_advantage}\n")
 print(f"Number of Hosts with Unfulfilled Choices: {unfulfilled_hosts}")
+print(f"The Hosts with Unfulfilled Choices: {unfulfilled_hosts_data}")
