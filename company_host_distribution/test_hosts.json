@@ -1,32 +1,15 @@
 {
-    "André Frisk": {
-        "first": "Fogarolli",
-        "remaining": ["Icaros", "Viking", "ICA"],
+    "Test Person 2": {
+        "first": "ARKAD",
+        "remaining": [...],
         "advantage": 0,
         "assigned": []
     },
-    "Alexander Hansson": {
-        "first": "Alexanders korvaluda",
-        "remaining": ["Maritza", "Icaros", "Coop", "ICA"],
+    "Test Person 2": {
+        "first": "TLTH",
+        "remaining": ["ARKAD", ...],
         "advantage": 0,
         "assigned": []
     },
-    "Enya Nilsson": {
-        "first": "Fogarolli",
-        "remaining": ["Icaros", "Viking", "ICA"],
-        "advantage": 0,
-        "assigned": []
-    },
-    "Niklas Ku": {
-        "first": "Piri Piri",
-        "remaining": ["Fogarolli", "Viking", "Coop", "ICA", "Bertils kiosk", "IKEA"],
-        "advantage": 0,
-        "assigned": []
-    },
-    "Linus Ljunghusen": {
-        "first": "Fogarolli",
-        "remaining": ["Alexanders korvaluda", "Bertils kiosk", "IKEA", "Coop"],
-        "advantage": 0,
-        "assigned": []
-    }
+    ...
 }
