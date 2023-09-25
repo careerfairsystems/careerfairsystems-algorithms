@@ -29,7 +29,10 @@ i = 1
 # Before the while loop, create a list of companies prioritized by how many students have them as their first choice
 company_priority = sorted(companies.keys(), key=lambda c: sum(1 for h, data in hosts.items() if data["first"] == c), reverse=True)
 
-while(True):
+max_remaining_length = max(len(data["remaining"].split(", ")) for _, data in hosts.items())
+
+
+while(i <= max_remaining_length):
     # Check if all hosts have two companies assigned
     all_assigned = all(len(data["assigned"]) == 2 for _, data in hosts.items())
     if all_assigned:
@@ -89,9 +92,6 @@ while(True):
     
     
     i += 1
-    # break
-    if(i == 5):
-        break
 
 # Post-processing to ensure all hosts have two companies
 for host, data in hosts.items():
@@ -132,8 +132,9 @@ percentage_any_choice = (any_choice_fulfilled / len(hosts)) * 100
 average_advantage = sum(data["advantage"] for data in hosts.values()) / len(hosts)
 
 # 4. Number of Hosts with Unfulfilled Choices
-unfulfilled_hosts_data = ', '.join([host for host, data in hosts.items() if not any(choice in data["assigned"] for choice in [data["first"]] + data["remaining"].split(", "))])
+unfulfilled_hosts_data = [host for host, data in hosts.items() if not any(choice in data["assigned"] for choice in [data["first"]] + data["remaining"].split(", "))]
 unfulfilled_hosts = len(unfulfilled_hosts_data)
+unfulfilled_hosts_data = ', '.join(unfulfilled_hosts_data)
 
 
 print(f"\n\nPercentage of First Choices Fulfilled: {percentage_first_choice}%")
