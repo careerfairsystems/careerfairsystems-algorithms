@@ -1,12 +1,12 @@
 # careerfairsystems-algorithms
 
 ## Company host distribution
-=============================
+
 There now exist a company host distribution with a accuracy of >90% for disributed hosts.
 Please check the code if the Excel sheets or names is corresponding to the one in the code. Otherwise fix it.
 
 #### Pseudo code
-================
+
 ```
 WHILE loop (runs until all hosts have two companies assigned or until the loop counter exceeds the maximum length of the "remaining" list):
 
@@ -43,7 +43,6 @@ WHILE loop (runs until all hosts have two companies assigned or until the loop c
 ```
 
 #### The data
-==============
 
 Inside the company host distribution folder there exist two test files for showing how the data is supposed to look like for the algorithm to work.
 
@@ -78,6 +77,6 @@ The `first` value is the company hosts priority choice of company. The `remainin
 
 
 ## TBD
-======
+
 - BANQUET SEATMAP (https://github.com/careerfairsystems/gasque-algorithm)[Potential algorithm]
 - Booking system for interviews for LG/PG/Coordinators
