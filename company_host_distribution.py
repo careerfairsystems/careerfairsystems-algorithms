@@ -108,9 +108,14 @@ for host, data in hosts.items():
         # If no company was assigned in the current iteration, break out of the while loop
         if not assigned_company:
             break
-        
 
-print("Companies with no host assigned:")
+print("\nHosts and their assigned companies:")
+for host, data in hosts.items():
+    assigned_companies = ', '.join(data["assigned"])
+    print(f"{host}: {assigned_companies}")
+  
+
+print("\nCompanies with no host assigned:")
 for company in companies:
     if not companies[company]:
         print(company)
@@ -127,7 +132,7 @@ percentage_any_choice = (any_choice_fulfilled / len(hosts)) * 100
 average_advantage = sum(data["advantage"] for data in hosts.values()) / len(hosts)
 
 # 4. Number of Hosts with Unfulfilled Choices
-unfulfilled_hosts_data = [host for host, data in hosts.items() if not any(choice in data["assigned"] for choice in [data["first"]] + data["remaining"].split(", "))]
+unfulfilled_hosts_data = ', '.join([host for host, data in hosts.items() if not any(choice in data["assigned"] for choice in [data["first"]] + data["remaining"].split(", "))])
 unfulfilled_hosts = len(unfulfilled_hosts_data)
 
 
