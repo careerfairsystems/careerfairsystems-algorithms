@@ -1,70 +1,145 @@
+import json
+import random
 import pandas as pd
+import math
 
-# Function to extract host section into textformat
-def program_to_text(program):
-    model = {
-        "A": ["Arkitekt", "Industridesign"],
-        "B": "Bioteknik",
-        "BI": "Brandingenjörsutbildning",
-        "V": ["Väg- och vatttenbyggnad", "Byggteknik med arkitektur", "Byggteknik med järnvägsteknik", "Byggteknik med väg- och trafikteknik"],
-        "D": "Datateknik",
-        "W": "Ekosystemteknik",
-        "E": "Elektroteknik",
-        "I": "Industriell ekonomi",
-        "C": "Informations- och kommunikationsteknik",
-        "K": "Kemiteknik",
-        "L": "Lantmäteri",
-        "MD": ["Maskinteknik med teknisk design", "Industridesign"],
-        "M": ["Maskinteknik", "Automotive", "Automation"],
-        "BME": ["Medicin och teknik", "Riskhantering"],
-        "F": "Teknisk Fysik",
-        "Pi": "Teknisk Matematik",
-        "N": "Teknisk Nanovetenskap"
+df_hosts = pd.read_excel('VÄRDAR 2023.xlsx', sheet_name='COMPANY HOST DATA', usecols='B:D')
+df_companies = pd.read_excel('VÄRDAR 2023.xlsx', sheet_name='COMPANY HOST STATISTIK ')
+
+companies = df_companies["Företag"].tolist()
+host_names = df_hosts["Unnamed: 1"].tolist()
+host_first = df_hosts["Unnamed: 2"].tolist()
+host_remaining = df_hosts["Unnamed: 3"].tolist()
+
+hosts = {
+    name: {
+        "first": first,
+        "remaining": remaining,
+        "advantage": 0,
+        "assigned": []
     }
+    for name, first, remaining in zip(host_names, host_first, host_remaining) if not name == "nan"
+}
 
-    if "Pi" in program:
-        section = "Pi"
-    else:
-        section = "".join(letter.upper() for letter in str(program) if letter.isalpha())
+companies = {
+    company: []
+    for company in companies if not company == "nan"
+}
 
-    return model[section] if section in model else ""
+""" r1 = open('test_hosts.json')
+r2 = open('test_companies.json')
 
+hosts = json.load(r1)
+companies = json.load(r2) """
 
-# Prepare companies data
-companies_df = pd.read_excel('companies.xlsx', sheet_name="profile")
-companies = []
-for company in companies_df.iterrows():
-    props = company[1]
-    name = props["name"]
-    desired_programme = props["profile.desiredProgramme"]
-    companies.append((name, desired_programme))
+i = 1
+# Before the while loop, create a list of companies prioritized by how many students have them as their first choice
+company_priority = sorted(companies.keys(), key=lambda c: sum(1 for h, data in hosts.items() if data["first"] == c), reverse=True)
 
-# Prepare company host data
-hosts_df = pd.read_excel('hosts.xlsx')
-company_hosts = []
-no_correct_programme_format = []
-for host in hosts_df.iterrows():
-    props = host[1]
-    name = str(props["Name"])
-    email = str(props["Email"])
-    program = program_to_text(str(props["Program and year of enrollment"]))
-
-    if not program:
-        no_correct_programme_format.append((name, email, props["Program and year of enrollment"]))
-
-    first, first_company = props["First choice of role"], props["If you selected COMPANY HOST as first choice, what organisation would you prefer to represent?"]
-    second, second_company = props["Second choice"], props["If you selected COMPANY HOST as second choice, what organisation would you prefer to represent?"]
-    third, third_company = props["Third choice"], props["If you selected COMPANY HOST as third choice, what organisation would you prefer to represent?"]
+while(True):
+    # Check if all hosts have two companies assigned
+    all_assigned = all(len(data["assigned"]) == 2 for _, data in hosts.items())
+    if all_assigned:
+        break
     
-    company_priority = []
-    for company in [first_company, second_company, third_company]:
-        company_priority.append(str(company) if company else "")
-    company_priority.extend([""] * (3 - len(company_priority)))
+    # First choice
+    for company in company_priority:
+        if companies[company]:  # If the company already has one host assigned, then it is done
+            continue
+        tmp_hosts = [host for host, data in hosts.items() if data["first"] == company and len(data["assigned"]) < 2]
+        
+        if tmp_hosts:
+            if len(tmp_hosts) > 1:
+                sorted_students = sorted(tmp_hosts, key=lambda x: (len(hosts[x]["remaining"]), -hosts[x]["advantage"]))
+                chosen = sorted_students[0]
+                for student in sorted_students[1:]:
+                    hosts[student]["advantage"] += 1
+            else:
+                chosen = tmp_hosts[0]
+            
+            hosts[chosen]["assigned"].append(company)
+            companies[company].append(chosen)    
+            
+    # Second choice
+    for company in companies:
+        # If the company already has one or more hosts assigned, then it is done
+        if len(companies[company]) >= 1:
+            continue
 
-    is_all_empty = all(item == 'nan' for item in company_priority)
-    if is_all_empty:
-        continue
+        tmp_hosts = []
 
-    company_hosts.append((name, email, program, company_priority))
+        for host in hosts:
+            h = hosts[host]
+            # If the host has already chosen two companies, the host is then done
+            if len(h["assigned"]) > 1:
+                continue
+
+            # Check if the company is in the host's "remaining" list
+            if company in h["remaining"]:
+                tmp_hosts.append(host)
+
+        if len(tmp_hosts) == i:
+            if len(tmp_hosts) > 1:
+                sorted_students = sorted(tmp_hosts, key=lambda x: (len(hosts[x]["remaining"]), -hosts[x]["advantage"]))
+                
+                # The first student in the sorted list is the chosen one
+                chosen = sorted_students[0]
+                
+                # All other students receive an "advantage" point
+                for student in sorted_students[1:]:
+                    hosts[student]["advantage"] += 1
+            else:
+                chosen = random.choice(tmp_hosts)
+
+            hosts[chosen]["assigned"].append(company)
+            companies[company].append(chosen)
+    
+    
+    i += 1
+    # break
+    if(i == 5):
+        break
+
+# Post-processing to ensure all hosts have two companies
+for host, data in hosts.items():
+    while len(data["assigned"]) < 2:
+        assigned_company = False  # Flag to check if a company was assigned in the current iteration
+        
+        for company, assigned_hosts in companies.items():
+            if len(assigned_hosts) == 0:
+                data["assigned"].append(company)
+                companies[company].append(host)
+                assigned_company = True
+                break
+        
+        # If no company was assigned in the current iteration, break out of the while loop
+        if not assigned_company:
+            break
 
 
+    
+""" print(json.dumps(hosts, indent=2))
+print(json.dumps(companies, indent=2)) """
+        
+
+print("Companies with no host assigned:")
+for company in companies:
+    if not companies[company]:
+        print(company)
+
+r1.close()
+r2.close()
+
+# 1. Percentage of First Choices Fulfilled
+first_choice_fulfilled = sum(1 for host, data in hosts.items() if data["first"] in data["assigned"])
+percentage_first_choice = (first_choice_fulfilled / len(hosts)) * 100
+
+# 2. Average Advantage Points
+average_advantage = sum(data["advantage"] for data in hosts.values()) / len(hosts)
+
+# 3. Number of Hosts with Unfulfilled Choices
+unfulfilled_hosts = sum(1 for host, data in hosts.items() if not any(choice in data["assigned"] for choice in [data["first"]] + data["remaining"]))
+
+print(f"\n\nPercentage of First Choices Fulfilled: {percentage_first_choice}%")
+print(f"Average Advantage Points: {average_advantage}")
+print(f"Number of Hosts with Unfulfilled Choices: {unfulfilled_hosts}")
