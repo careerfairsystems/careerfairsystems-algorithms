@@ -46,13 +46,19 @@ while(i <= max_remaining_length):
         tmp_hosts = [host for host, data in hosts.items() if data["first"] == company and len(data["assigned"]) < 2]
         
         if tmp_hosts:
-            if len(tmp_hosts) > 1:
+            if len(tmp_hosts) == 2:
+                print(tmp_hosts)
+                chosen = random.choice(tmp_hosts)
+                for student in tmp_hosts[1:]:
+                    hosts[student]["advantage"] += 1
+                print(chosen)
+            elif len(tmp_hosts) > 2:
                 sorted_students = sorted(tmp_hosts, key=lambda x: (len(hosts[x]["remaining"]), -hosts[x]["advantage"]))
                 chosen = sorted_students[0]
                 for student in sorted_students[1:]:
                     hosts[student]["advantage"] += 1
             else:
-                chosen = tmp_hosts[0]
+                chosen = random.choice(tmp_hosts)
             
             hosts[chosen]["assigned"].append(company)
             companies[company].append(chosen)    
@@ -78,7 +84,11 @@ while(i <= max_remaining_length):
                 tmp_hosts.append(host)
 
         if len(tmp_hosts) == i:
-            if len(tmp_hosts) > 1:
+            if len(tmp_hosts) == 2:
+                chosen = random.choice(tmp_hosts)
+                for student in tmp_hosts[1:]:
+                    hosts[student]["advantage"] += 1
+            elif len(tmp_hosts) > 2:
                 sorted_students = sorted(tmp_hosts, key=lambda x: (len(hosts[x]["remaining"]), -hosts[x]["advantage"]))
                 
                 # The first student in the sorted list is the chosen one
