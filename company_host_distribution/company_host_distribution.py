@@ -47,11 +47,9 @@ while(i <= max_remaining_length):
         
         if tmp_hosts:
             if len(tmp_hosts) == 2:
-                print(tmp_hosts)
                 chosen = random.choice(tmp_hosts)
                 for student in tmp_hosts[1:]:
                     hosts[student]["advantage"] += 1
-                print(chosen)
             elif len(tmp_hosts) > 2:
                 sorted_students = sorted(tmp_hosts, key=lambda x: (len(hosts[x]["remaining"]), -hosts[x]["advantage"]))
                 chosen = sorted_students[0]
