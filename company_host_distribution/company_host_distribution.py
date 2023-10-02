@@ -1,7 +1,7 @@
 import random
 import pandas as pd
 
-df_hosts = pd.read_excel('VÄRDAR 2023.xlsx', sheet_name='COMPANY HOST DATA', usecols='B:D')
+df_hosts = pd.read_excel('VÄRDAR 2023.xlsx', sheet_name='ANDRÉS BLAD )', usecols='B:D')
 df_companies = pd.read_excel('VÄRDAR 2023.xlsx', sheet_name='COMPANY HOST STATISTIK ')
 
 companies = df_companies["Företag"].tolist()
@@ -16,8 +16,9 @@ hosts = {
         "advantage": 0,
         "assigned": []
     }
-    for name, first, remaining in zip(host_names, host_first, host_remaining) if not str(name) == "nan"
+    for name, first, remaining in zip(host_names, host_first, host_remaining)
 }
+
 
 companies = {
     company: []
@@ -29,7 +30,7 @@ i = 1
 # Before the while loop, create a list of companies prioritized by how many students have them as their first choice
 company_priority = sorted(companies.keys(), key=lambda c: sum(1 for h, data in hosts.items() if data["first"] == c), reverse=True)
 
-max_remaining_length = max(len(data["remaining"].split(", ")) for _, data in hosts.items())
+max_remaining_length = max(len(data["remaining"].split(", ")) for _, data in hosts.items() if data["remaining"] and not pd.isna(data["remaining"]))
 
 
 while(i <= max_remaining_length):
@@ -66,6 +67,8 @@ while(i <= max_remaining_length):
 
         for host in hosts:
             h = hosts[host]
+            if pd.isna(h["first"]) or pd.isna(h["remaining"]):
+                continue
             # If the host has already chosen two companies, the host is then done
             if len(h["assigned"]) > 1:
                 continue
@@ -121,18 +124,37 @@ for company in companies:
         print(company)
 
 # 1. Percentage of First Choices Fulfilled
-first_choice_fulfilled = sum(1 for host, data in hosts.items() if data["first"] in data["assigned"])
-percentage_first_choice = (first_choice_fulfilled / len(hosts)) * 100
+first_choice_fulfilled = sum(1 for host, data in hosts.items() if (
+    not pd.isna(data["first"]) and  # Check if "first" is not NaN
+    not pd.isna(data["remaining"]) and  # Check if "remaining" is not NaN
+    data["first"] in data["assigned"]
+))
+total_valid_hosts = sum(1 for data in hosts.values() if (
+    not pd.isna(data["first"]) and  # Check if "first" is not NaN
+    not pd.isna(data["remaining"])  # Check if "remaining" is not NaN
+))
+percentage_first_choice = (first_choice_fulfilled / total_valid_hosts) * 100
 
 # 2. Percentage of Any Choice (First or Remaining) Fulfilled
-any_choice_fulfilled = sum(1 for host, data in hosts.items() if any(choice in data["assigned"] for choice in [data["first"]] + data["remaining"].split(", ")))
-percentage_any_choice = (any_choice_fulfilled / len(hosts)) * 100
+any_choice_fulfilled = sum(1 for host, data in hosts.items() if (
+    not pd.isna(data["first"]) and  # Check if "first" is not NaN
+    not pd.isna(data["remaining"]) and  # Check if "remaining" is not NaN
+    any(choice in data["assigned"] for choice in [data["first"]] + data["remaining"].split(", "))
+))
+percentage_any_choice = (any_choice_fulfilled / total_valid_hosts) * 100
 
 # 3. Average Advantage Points
-average_advantage = sum(data["advantage"] for data in hosts.values()) / len(hosts)
+average_advantage = sum(data["advantage"] for host, data in hosts.items() if (
+    not pd.isna(data["first"]) and  # Check if "first" is not NaN
+    not pd.isna(data["remaining"])  # Check if "remaining" is not NaN
+)) / total_valid_hosts
 
 # 4. Number of Hosts with Unfulfilled Choices
-unfulfilled_hosts_data = [host for host, data in hosts.items() if not any(choice in data["assigned"] for choice in [data["first"]] + data["remaining"].split(", "))]
+unfulfilled_hosts_data = [host for host, data in hosts.items() if (
+    not pd.isna(data["first"]) and  # Check if "first" is not NaN
+    not pd.isna(data["remaining"]) and  # Check if "remaining" is not NaN
+    not any(choice in data["assigned"] for choice in [data["first"]] + data["remaining"].split(", "))
+)]
 unfulfilled_hosts = len(unfulfilled_hosts_data)
 unfulfilled_hosts_data = ', '.join(unfulfilled_hosts_data)
 
