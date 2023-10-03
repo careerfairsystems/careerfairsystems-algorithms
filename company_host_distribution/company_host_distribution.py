@@ -113,6 +113,7 @@ while(i <= max_remaining_length):
                     -hosts[x]["advantage"],
                     hosts.get(x, {}).get("location") == companies[company]["location"]
                 ))
+
                 # The first student in the sorted list is the chosen one
                 chosen = sorted_students[0]
                 # All other students receive an "advantage" point
