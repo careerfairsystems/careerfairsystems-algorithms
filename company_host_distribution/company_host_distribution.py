@@ -5,7 +5,7 @@ import sys
 
 df_hosts = pd.read_excel('VÄRDAR 2023.xlsx', sheet_name='ANDRÉS BLAD )', usecols='B:D')
 df_companies = pd.read_excel('VÄRDAR 2023.xlsx', sheet_name='COMPANY HOST STATISTIK ')
-df_companies_location = pd.read_excel('Företagsplacering 2023.xlsx', sheet_name='Andre')
+df_companies_location = pd.read_excel('Företagsplacering 2023.xlsx', sheet_name='Till André')
 
 companies = df_companies_location["företag"].tolist()
 companies_location = df_companies_location["hus"].tolist()
@@ -204,6 +204,31 @@ for company, data in companies.items():
     if not data["host"]:
         print(company)
 
+# 0. Company hosts stats where both companies are in the same house
+##################
+# Create a dictionary to track hosts and their assigned companies
+hosts_in_same_house = {}
+
+for host, data in hosts.items():
+    assigned_companies = data["assigned"]
+    
+    # Ensure the host has exactly two assigned companies
+    if len(assigned_companies) == 2:
+        company1, company2 = assigned_companies
+        house1 = companies[company1]["location"]
+        house2 = companies[company2]["location"]
+        
+        if house1 and house2 and house1 == house2:
+            hosts_in_same_house[host] = (company1, company2)
+
+# Number of hosts with both companies in the same house
+num_hosts_in_same_house = len(hosts_in_same_house)
+
+# Percentage of hosts with both companies in the same house
+percentage_hosts_in_same_house = (num_hosts_in_same_house / len(hosts)) * 100
+####################
+
+
 
 # 1. Percentage of First Choices Fulfilled
 first_choice_fulfilled = sum(1 for host, data in hosts.items() if (
@@ -246,3 +271,4 @@ print(f"Percentage of Any Choice Fulfilled: {percentage_any_choice:.2f}%")
 print(f"Average Advantage Points: {average_advantage}\n")
 print(f"Number of Hosts with Unfulfilled Choices: {unfulfilled_hosts}")
 print(f"The Hosts with Unfulfilled Choices: {unfulfilled_hosts_data}")
+print(f"\nPercentage of hosts with both companies in the same house: {percentage_hosts_in_same_house:.2f}%")
